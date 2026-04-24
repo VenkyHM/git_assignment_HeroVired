@@ -231,5 +231,83 @@ docker-compose version
 docker-compose up --build
 
 
+**********************************************************
+gateway improved code 
+*********************************************************
+
+const express = require('express');
+const axios = require('axios');
+
+const app = express();
+app.use(express.json());
+
+const port = 3003;
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: 'Gateway Service is running' });
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'Gateway Service is healthy' });
+});
+
+// Get users
+app.get('/api/users', async (req, res) => {
+  try {
+    const response = await axios.get('http://user-service:3000/users');
+    res.json(response.data);
+  } catch (error) {
+    console.error('Users Error:', error.message);
+    res.status(500).json({ error: 'Error fetching users', details: error.message });
+  }
+});
+
+// Get products
+app.get('/api/products', async (req, res) => {
+  try {
+    const response = await axios.get('http://product-service:3001/products');
+    res.json(response.data);
+  } catch (error) {
+    console.error('Products Error:', error.message);
+    res.status(500).json({ error: 'Error fetching products', details: error.message });
+  }
+});
+
+// OPTIONAL: Only include if order-service exists
+
+// Get orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    const response = await axios.get('http://order-service:3002/orders');
+    res.json(response.data);
+  } catch (error) {
+    console.error('Orders Error:', error.message);
+    res.status(500).json({ error: 'Error fetching orders', details: error.message });
+  }
+});
+
+// Create order
+app.post('/api/orders', async (req, res) => {
+  try {
+    const response = await axios.post(
+      'http://order-service:3002/orders',
+      req.body
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error('Create Order Error:', error.message);
+    res.status(500).json({ error: 'Error creating order', details: error.message });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Gateway service running on port ${port}`);
+});
+
+
+
+
 
 
